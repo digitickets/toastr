@@ -185,7 +185,7 @@ toastr.options.closeMethod = 'slideUp';
 ```
 
 ### Prevent Duplicates
-Rather than having identical toasts stack, set the preventDuplicates property to true. Duplicates are matched to the previous toast based on their message content.
+Rather than having identical toasts stack, set the preventDuplicates property to true. If any toasts with the same type, message, title, and position are already displayed the new toast will not be shown.
 ```js
 toastr.options.preventDuplicates = true;
 ```

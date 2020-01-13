@@ -37,7 +37,7 @@
                 warning: warning
             };
 
-            var previousToast;
+            var currentToasts = {};
 
             return toastr;
 
@@ -215,7 +215,7 @@
                 $container = getContainer(options, true);
 
                 var intervalId = null;
-                var $toastElement = $('<div/>');
+                var $toastElement = $('<div/>').attr('data-toast-id', toastId);
                 var $titleElement = $('<div/>');
                 var $messageElement = $('<div/>');
                 var $progressElement = $('<div/>');
@@ -236,6 +236,9 @@
                 personalizeToast();
 
                 displayToast();
+
+                // Add toast to the list of displayed toasts.
+                currentToasts[toastId] = response;
 
                 handleEvents();
 
@@ -392,10 +395,21 @@
 
                 function shouldExit(options, map) {
                     if (options.preventDuplicates) {
-                        if (map.message === previousToast) {
-                            return true;
-                        } else {
-                            previousToast = map.message;
+                        for (var toastId in currentToasts) {
+                            if (currentToasts.hasOwnProperty(toastId)) {
+                                var existingToast = currentToasts[toastId];
+                                if (existingToast.map.message === map.message &&
+                                    existingToast.map.title === map.title &&
+                                    existingToast.map.type === map.type &&
+                                    existingToast.options.positionClass === options.positionClass) {
+
+                                    if (options.debug && console) {
+                                        console.log('Skipping duplicate toast.', existingToast);
+                                    }
+
+                                    return true;
+                                }
+                            }
                         }
                     }
                     return false;
@@ -457,11 +471,12 @@
                 if ($toastElement.is(':visible')) {
                     return;
                 }
+                var toastId = $toastElement.attr('data-toast-id');
+                delete currentToasts[toastId];
                 $toastElement.remove();
                 $toastElement = null;
                 if ($container.children().length === 0) {
                     $container.remove();
-                    previousToast = undefined;
                 }
             }
 
